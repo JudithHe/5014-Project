@@ -1,5 +1,6 @@
 package com.xueai8;
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.ValueState;
@@ -13,8 +14,10 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.co.CoProcessFunction;
+import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.util.Collector;
 
+import org.apache.flink.core.fs.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -44,7 +47,6 @@ public class Nation {
 				return value.f1.equals("CANADA");
 			}
 		});
-		nation_map.print();
 		//nation_map.writeAsCsv("/Users/judith/Project/StreamingData/data/nation_map.csv");
 		DataStream<Tuple7<Integer, String, String, Integer, String, Double, String>> customer_map =
 				customer.map(new org.apache.flink.api.common.functions.MapFunction<String, Tuple7<Integer, String, String, Integer, String, Double, String>>() {
@@ -132,7 +134,14 @@ public class Nation {
 				whole_join_keyed = whole_addkey.keyBy(value -> value.f0);
 		//use process function to do aggregation
 		DataStream result = whole_join_keyed.process(new countRevenue());
-		result.writeAsCsv("/Users/judith/Project/StreamingData/data/result.csv");
+		//result.writeAsCsv("/Users/judith/Project/StreamingData/data/result.csv");
+		result.print();
+		StreamingFileSink<String> sink = StreamingFileSink
+				.forRowFormat(new Path("/Users/judith/Project/StreamingData/data/output"),
+						new SimpleStringEncoder<String>("UTF-8"))
+				.build();
+
+		result.addSink(sink);
 		// 执行
 		env.execute("Nation Job");
 	}
