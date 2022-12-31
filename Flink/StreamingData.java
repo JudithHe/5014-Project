@@ -171,14 +171,17 @@ public class StreamingData {
 				whole_join_keyed = whole_addkey.keyBy(value -> value.f0);
 		//use process function to do aggregation
 		DataStream result = whole_join_keyed.process(new countRevenue());
-		//result.writeAsCsv("/Users/judith/Project/StreamingData/data/result.csv");
+		result.writeAsCsv("/Users/judith/Project/StreamingData/data/data25_res.csv");
+		//result.writeAsCsv("/Users/judith/Project/StreamingData/data/data50_res.csv");
+		//result.writeAsCsv("/Users/judith/Project/StreamingData/data/data75_res.csv");
+		//result.writeAsCsv("/Users/judith/Project/StreamingData/data/data100_res.csv");
 		result.print();
-		StreamingFileSink<String> sink = StreamingFileSink
-				.forRowFormat(new Path("/Users/judith/Project/StreamingData/data/output"),
-						new SimpleStringEncoder<String>("UTF-8"))
-				.build();
+		//StreamingFileSink<String> sink = StreamingFileSink
+				//.forRowFormat(new Path("/Users/judith/Project/StreamingData/data/output"),
+						//new SimpleStringEncoder<String>("UTF-8"))
+				//.build();
 
-		result.addSink(sink);
+		//result.addSink(sink);
 		// 执行
 		env.execute("Nation Job");
 	}
